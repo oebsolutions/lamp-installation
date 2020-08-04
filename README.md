@@ -1,16 +1,18 @@
-# lamp-installation
-
-
 LAMP Installation
 ===========================
 Aiming to install LAMP stack and make some configuration super fast.
 
+Compatibility
+-------------
+
+Tested on newly deployed Ubuntu 20.04 [upcloud](https://www.upcloud.com) server.
+
 How to use it:
 -------------
 
-Download the following shell script on your Ubuntu server or clone it with the following command.
+Run the below command to download installation script.
 ```
-git clone git@github.com:oebsolutions/lamp-installation.git
+wget https://raw.githubusercontent.com/oebsolutions/lamp-installation/master/install.sh
 ```
 Make the file executable
 ------------------------------
