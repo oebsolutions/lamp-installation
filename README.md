@@ -7,6 +7,10 @@ Compatibility
 
 Tested on newly deployed Ubuntu 20.04 [upcloud](https://www.upcloud.com) server.
 
+Upcloud has incredibly fast [servers](https://upcloud.com/compare/digitalocean/). Their $5 linux box is much faster than my gaming laptop!! 
+Check the following [link](https://www.vpsbenchmarks.com/best_vps) to compare VPS companies.
+You receive a bonus worth of **$25** when signing up through the following [link](https://upcloud.com/signup/?promo=J333QD).
+
 How to use it:
 -------------
 
