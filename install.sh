@@ -5,7 +5,7 @@
 SCRIPT_NAME="Oebs LAMP installation script for ubuntu 20.04"
 SCRIPT_VERSION="v1.0"
 MYSQL_OLD_ROOT_PASSWORD=''
-SSH_CONFIG_FILE="/etc/ssh/ssh_config"
+SSH_CONFIG_FILE="/etc/ssh/sshd_config"
 MYSQL_CONFIG_FILE="/etc/mysql/mysql.conf.d/mysqld.cnf"
 
 
@@ -144,6 +144,7 @@ select_option(){
         3)	
             sudo apt-get update
             sudo apt install -y apache2
+            sudo a2enmod rewrite
             APACHE2='OK';;
         4)	
             sudo service apache2 restart
@@ -175,7 +176,32 @@ select_option(){
             read -p "Enter existing root password: " MYSQL_OLD_ROOT_PASSWORD
             read -p "Enter new root password: " MYSQL_NEW_ROOT_PASSWORD
             change_root_password;;
-        11)	
+        11)
+            exit 1;;
+            # under construction
+            sudo apt update
+            sudo apt upgrade
+
+            sudo apt install wireguard
+            sudo apt install openresolv
+            sudo apt install resolvconf
+
+            
+            # To bring the WireGuard interface at boot time run the following command:
+            systemctl start wg-quick@wg0
+            systemctl enable wg-quick@wg0
+
+
+
+            # for NAT to work
+            sudo nano /etc/sysctl.d/wg.conf
+            net.ipv4.ip_forward = 1
+            net.ipv6.conf.all.forwarding = 1
+
+            sudo sysctl --system;;
+
+
+        12)	
             exit 1;;
         *) ;;
     esac
