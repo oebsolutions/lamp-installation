@@ -134,7 +134,8 @@ grant_all(){
         mysql -u root -p$MYSQL_ROOT_PASSWORD -e "$sql"
         echo -e "${LIGHTGREEN} $MYSQL_USER_NAME is now in GOD mode . ${NC}"
     else
-
+        echo -e "${LIGHTRED} Install mysql first. ${NC}"
+    fi
 }
 
 
