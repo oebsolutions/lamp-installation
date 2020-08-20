@@ -73,8 +73,8 @@ get_version(){
 
 create_mysql_user(){
     q1="CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE_NAME CHARACTER SET utf8 COLLATE utf8_unicode_ci;"
-    q2="CREATE USER IF NOT EXISTS '$MYSQL_USER_NAME'@'localhost' IDENTIFIED BY '$MYSQL_USER_PASSWORD';"
-    q3="GRANT ALL ON $MYSQL_DATABASE_NAME.* TO '$MYSQL_USER_NAME'@'localhost';"
+    q2="CREATE USER IF NOT EXISTS '$MYSQL_USER_NAME'@'$MYSQL_USER_HOST' IDENTIFIED BY '$MYSQL_USER_PASSWORD';"
+    q3="GRANT ALL ON $MYSQL_DATABASE_NAME.* TO '$MYSQL_USER_NAME'@'$MYSQL_USER_HOST';"
     q4="FLUSH PRIVILEGES;"
 
 
@@ -122,7 +122,7 @@ change_root_password(){
 
 grant_all(){
 
-    q1 = "GRANT USAGE ON *.* TO '$MYSQL_USER_NAME'@'$MYSQL_USER_HOST' WITH GRANT OPTION;"
+    q1 = "GRANT ALL ON *.* TO '$MYSQL_USER_NAME'@'$MYSQL_USER_HOST';"
     q2 = "FLUSH PRIVILEGES;"
 
     get_version
@@ -199,6 +199,7 @@ select_option(){
         9)
             read -p "Enter mysql database name: " MYSQL_DATABASE_NAME
             read -p "Enter mysql user name: " MYSQL_USER_NAME
+            read -p "Enter mysql host name ('%' or 'localhost'): " MYSQL_HOST_NAME
             read -p "Enter mysql user password: " MYSQL_USER_PASSWORD
             read -p "Enter mysql root password: " MYSQL_ROOT_PASSWORD
             create_mysql_user
