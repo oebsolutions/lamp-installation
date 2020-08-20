@@ -7,7 +7,7 @@ SCRIPT_VERSION="v1.0"
 MYSQL_OLD_ROOT_PASSWORD=''
 SSH_CONFIG_FILE="/etc/ssh/sshd_config"
 MYSQL_CONFIG_FILE="/etc/mysql/mysql.conf.d/mysqld.cnf"
-
+PHP_CONFIG_FILE="/etc/php/7.4/apache2/php.ini"
 
 
 # DO NOT CHANGE BELOW
@@ -25,11 +25,15 @@ SSH_SERVICE=''
 APACHE2=''
 APACHE2_SERVICE=''
 PHP=''
+PHP_CONFIG=''
 MYSQL=''
 MYSQL_SERVICE=''
 MYSQL_CONFIG=''
 MYSQL_CREATE=''
 MYSQL_CHANGE_ROOT_PASSWORD=''
+
+
+
 
 PHP_VERSION='Not installed'
 APACHE_VERSION='Not installed'
@@ -38,6 +42,7 @@ MYSQL_VERSION='Not installed'
 MYSQL_DATABASE_NAME=''
 MYSQL_USER_NAME=''
 MYSQL_USER_PASSWORD=''
+MYSQL_USER_HOST=''
 
 
 get_version(){
@@ -72,12 +77,21 @@ create_mysql_user(){
     q3="GRANT ALL ON $MYSQL_DATABASE_NAME.* TO '$MYSQL_USER_NAME'@'localhost';"
     q4="FLUSH PRIVILEGES;"
 
-    sql="${q1}${q2}${q3}${q4}"
-    mysql -u root -p$MYSQL_ROOT_PASSWORD -e "$sql"
-    echo -e "${LIGHTGREEN} Database: $MYSQL_DATABASE_NAME ${NC}"
-    echo -e "${LIGHTGREEN} User name: $MYSQL_USER_NAME ${NC}"
-    echo -e "${LIGHTGREEN} User password: $MYSQL_USER_PASSWORD ${NC}"
-    echo -e "${LIGHTGREEN} Successfully created. ${NC}"
+
+    get_version
+
+
+    if [[ "$MYSQL_VERSION" != "Not installed" ]]
+    then
+        sql="${q1}${q2}${q3}${q4}"
+        mysql -u root -p$MYSQL_ROOT_PASSWORD -e "$sql"
+        echo -e "${LIGHTGREEN} Database: $MYSQL_DATABASE_NAME ${NC}"
+        echo -e "${LIGHTGREEN} User name: $MYSQL_USER_NAME ${NC}"
+        echo -e "${LIGHTGREEN} User password: $MYSQL_USER_PASSWORD ${NC}"
+        echo -e "${LIGHTGREEN} Successfully created. ${NC}"
+    else
+        echo -e "${LIGHTRED} Install mysql first. ${NC}"
+    fi
 
 }
 
@@ -104,6 +118,22 @@ change_root_password(){
         echo -e "${LIGHTRED} Install mysql first. ${NC}"
     fi
 
+}
+
+grant_all(){
+
+    q1 = "GRANT USAGE ON *.* TO '$MYSQL_USER_NAME'@'$MYSQL_USER_HOST' WITH GRANT OPTION;"
+    q2 = "FLUSH PRIVILEGES;"
+
+    get_version
+
+
+    if [[ "$MYSQL_VERSION" != "Not installed" ]]
+    then
+        sql="${q1}${q2}"
+        mysql -u root -p$MYSQL_ROOT_PASSWORD -e "$sql"
+        echo -e "${LIGHTGREEN} $MYSQL_USER_NAME is now in GOD mode . ${NC}"
+    else
 
 }
 
@@ -200,8 +230,19 @@ select_option(){
 
             sudo sysctl --system;;
 
-
         12)	
+            sed -i '/$SCRIPT_NAME/d' $PHP_CONFIG_FILE
+
+            sed -i '/max_execution_time/d' $PHP_CONFIG_FILE
+            sed -i '/memory_limit/d' $PHP_CONFIG_FILE
+
+            echo "# $SCRIPT_NAME $SCRIPT_VERSION" >> $PHP_CONFIG_FILE
+
+            sed -i '$ a max_execution_time = 86400' $PHP_CONFIG_FILE
+            sed -i '$ a memory_limit = 512M' $PHP_CONFIG_FILE
+
+            PHP_CONFIG='OK';;
+        13)	
             exit 1;;
         *) ;;
     esac
@@ -252,7 +293,9 @@ show_menu(){
     echo -e "${CYAN} 8 Mysql remote access ${LIGHTGREEN} $MYSQL_CONFIG ${NC}"
     echo -e "${CYAN} 9 Mysql create database, user ${LIGHTGREEN} $MYSQL_CREATE ${NC}"
     echo -e "${CYAN} 10 Mysql change root password ${LIGHTGREEN} $MYSQL_CHANGE_ROOT_PASSWORD ${NC}"
-    echo -e "${CYAN} 11 Exit ${NC}"
+    echo -e "${CYAN} 11 Install wireguard (under construction) ${NC}"
+    echo -e "${CYAN} 12 Php.ini configuration cli + apache2 ${NC}"
+    echo -e "${CYAN} 13 Exit ${NC}"
     echo "###################################################################################"
     read -p "Select an option: " key
     select_option $key
