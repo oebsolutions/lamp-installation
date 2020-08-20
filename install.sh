@@ -208,8 +208,7 @@ select_option(){
             read -p "Enter new root password: " MYSQL_NEW_ROOT_PASSWORD
             change_root_password;;
         11)
-            exit 1;;
-            # under construction
+            
             sudo apt update
             sudo apt upgrade
 
