@@ -201,7 +201,7 @@ select_option(){
         9)
             read -p "Enter mysql database name: " MYSQL_DATABASE_NAME
             read -p "Enter mysql user name: " MYSQL_USER_NAME
-            read -p "Enter mysql host name ('%' or 'localhost', with quotes): " MYSQL_USER_HOST
+            read -p "Enter mysql host name (% or localhost, w/o quotes): " MYSQL_USER_HOST
             read -p "Enter mysql user password: " MYSQL_USER_PASSWORD
             read -p "Enter mysql root password: " MYSQL_ROOT_PASSWORD
             create_mysql_user
