@@ -18,6 +18,7 @@ CYAN='\033[0;36m'
 LIGHTRED='\033[1;31m'
 LIGHTGREEN='\033[1;32m'
 NC='\033[0m'
+WHITE='\033[1;37m'
 
 MYSQL_NEW_ROOT_PASSWORD=''
 SSH=''
@@ -191,23 +192,25 @@ select_option(){
         7)	
             sudo service mysql restart
             MYSQL_SERVICE='OK';;
-        8)	
-            sed -i '/bind-address/d' $MYSQL_CONFIG_FILE
-            echo "# $SCRIPT_NAME $SCRIPT_VERSION" >> $MYSQL_CONFIG_FILE
-            sed -i '$ a bind-address    =   0.0.0.0' $MYSQL_CONFIG_FILE
-            MYSQL_CONFIG='OK';;
+        8)
+            echo -e "${WHITE}Enter existing root password ${RED}(leave blank after fresh mysql installation): "
+            read MYSQL_OLD_ROOT_PASSWORD
+            echo -e "${WHITE}Enter new root password: " 
+            read MYSQL_NEW_ROOT_PASSWORD
+            change_root_password;;
         9)
             read -p "Enter mysql database name: " MYSQL_DATABASE_NAME
             read -p "Enter mysql user name: " MYSQL_USER_NAME
-            read -p "Enter mysql host name ('%' or 'localhost'): " MYSQL_HOST_NAME
+            read -p "Enter mysql host name ('%' or 'localhost', with quotes): " MYSQL_HOST_NAME
             read -p "Enter mysql user password: " MYSQL_USER_PASSWORD
             read -p "Enter mysql root password: " MYSQL_ROOT_PASSWORD
             create_mysql_user
             MYSQL_CREATE='OK';;
-        10)
-            read -p "Enter existing root password: " MYSQL_OLD_ROOT_PASSWORD
-            read -p "Enter new root password: " MYSQL_NEW_ROOT_PASSWORD
-            change_root_password;;
+        10)	
+            sed -i '/bind-address/d' $MYSQL_CONFIG_FILE
+            echo "# $SCRIPT_NAME $SCRIPT_VERSION" >> $MYSQL_CONFIG_FILE
+            sed -i '$ a bind-address    =   0.0.0.0' $MYSQL_CONFIG_FILE
+            MYSQL_CONFIG='OK';;
         11)
             
             sudo apt update
@@ -291,9 +294,9 @@ show_menu(){
     echo -e "${CYAN} 5 Install php ${YELLOW} $PHP_VERSION ${LIGHTGREEN} $PHP ${NC}"
     echo -e "${CYAN} 6 Install mysql ${YELLOW} $MYSQL_VERSION ${LIGHTGREEN} $MYSQL ${NC}"
     echo -e "${CYAN} 7 Restart mysql ${LIGHTGREEN} $MYSQL_SERVICE ${NC}"
-    echo -e "${CYAN} 8 Mysql remote access ${LIGHTGREEN} $MYSQL_CONFIG ${NC}"
+    echo -e "${CYAN} 8 Mysql change root password ${LIGHTGREEN} $MYSQL_CHANGE_ROOT_PASSWORD ${NC}"
     echo -e "${CYAN} 9 Mysql create database, user ${LIGHTGREEN} $MYSQL_CREATE ${NC}"
-    echo -e "${CYAN} 10 Mysql change root password ${LIGHTGREEN} $MYSQL_CHANGE_ROOT_PASSWORD ${NC}"
+    echo -e "${CYAN} 10 Mysql remote access ${LIGHTGREEN} $MYSQL_CONFIG ${NC}"
     echo -e "${CYAN} 11 Install wireguard (under construction) ${NC}"
     echo -e "${CYAN} 12 Php.ini configuration cli + apache2 ${NC}"
     echo -e "${CYAN} 13 Exit ${NC}"
