@@ -9,7 +9,7 @@ SSH_CONFIG_FILE="/etc/ssh/sshd_config"
 MYSQL_CONFIG_FILE="/etc/mysql/mysql.conf.d/mysqld.cnf"
 PHP_CONFIG_FILE="/etc/php/7.4/apache2/php.ini"
 APACHE_CONFIG_FILE="/etc/apache2/apache2.conf"
-MODSECURITY_CONFIG_FILE="/etc/apache2/mods-enabled/security2.conf"
+MODSECURITY_CONFIG_FILE="/etc/apache2/mods-available/security2.conf"
 
 
 # DO NOT CHANGE BELOW
@@ -207,6 +207,7 @@ select_option(){
             if [[ $VAR == 'y' ]]
             then
                 sudo apt install libapache2-mod-security2 -y
+                sudo a2enmod security2
                 sudo service apache2 restart
             else
                 exit 1
