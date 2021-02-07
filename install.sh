@@ -191,7 +191,7 @@ select_option(){
             APACHE2='OK';;
 
         31)
-            echo -e "install apache2 headers (y/n) ?"
+            echo -e "${CYAN}install apache2 headers (y/n) ?"
             read VAR
 
             if [[ $VAR == 'y' ]]
@@ -202,7 +202,7 @@ select_option(){
                 exit 1
             fi
 
-            echo -e "install apache2 ModSecurity module (y/n) ?"
+            echo -e "${CYAN}install apache2 ModSecurity module (y/n) ?"
             read VAR
             if [[ $VAR == 'y' ]]
             then
@@ -214,7 +214,7 @@ select_option(){
             fi
 
 
-            echo -e "apply ModSecurity CSR rules from github (y/n) ? "
+            echo -e "${CYAN}apply ModSecurity CSR rules from github (y/n) ? "
             read VAR
             if [[ $VAR == 'y' ]]
             then
@@ -245,7 +245,7 @@ select_option(){
 
 
 
-            echo -e "apply some security configuration to  apache2.conf (y/n) ?"
+            echo -e "${CYAN}apply some security configuration to  apache2.conf (y/n) ?"
             read VAR
             if [[ $VAR == 'y' ]]
             then
@@ -263,6 +263,12 @@ select_option(){
                 sed -i '/Header set X-XSS-Protection "1; mode=block"/d' $APACHE_CONFIG_FILE
                 sed -i '/Header set X-Content-Type-Options nosniff/d' $APACHE_CONFIG_FILE
                 sed -i '/Header set Referrer-Policy "no-referrer"/d' $APACHE_CONFIG_FILE
+
+                
+                sed -i '/    SecRuleEngine on/d' $APACHE_CONFIG_FILE
+                sed -i '/    ServerTokens Min/d' $APACHE_CONFIG_FILE
+                sed -i '/    SecServerSignature " "/d' $APACHE_CONFIG_FILE
+                
 
 
                 # add the following lines to the end of file
