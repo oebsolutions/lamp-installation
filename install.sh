@@ -206,7 +206,7 @@ select_option(){
             read VAR
             if [[ $VAR == 'y' ]]
             then
-                sudo apt installibapache2-mod-security2 -y
+                sudo apt instal libapache2-mod-security2 -y
                 sudo service apache2 restart
             else
                 exit 1
