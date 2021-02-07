@@ -202,6 +202,7 @@ select_option(){
                 exit 1
             fi
 
+            echo -e "----------------------------------------------------------------------"
             echo -e "${CYAN}install apache2 ModSecurity module (y/n) ?${NC}"
             read VAR
             if [[ $VAR == 'y' ]]
@@ -213,8 +214,8 @@ select_option(){
                 exit 1
             fi
 
-
-            echo -e "${CYAN}apply ModSecurity CSR rules from github (y/n) ? ${NC}"
+            echo -e "----------------------------------------------------------------------"
+            echo -e "apply ModSecurity CSR rules from github (y/n) ?"
             read VAR
             if [[ $VAR == 'y' ]]
             then
@@ -244,7 +245,7 @@ select_option(){
             fi
 
 
-
+            echo -e "----------------------------------------------------------------------"
             echo -e "${CYAN}apply some security configuration to  apache2.conf (y/n) ?${NC}"
             read VAR
             if [[ $VAR == 'y' ]]
