@@ -8,6 +8,8 @@ MYSQL_OLD_ROOT_PASSWORD=''
 SSH_CONFIG_FILE="/etc/ssh/sshd_config"
 MYSQL_CONFIG_FILE="/etc/mysql/mysql.conf.d/mysqld.cnf"
 PHP_CONFIG_FILE="/etc/php/7.4/apache2/php.ini"
+APACHE_CONFIG_FILE="/etc/apache2/apache2.conf"
+MODSECURITY_CONFIG_FILE="/etc/apache2/mods-enabled/security2.conf"
 
 
 # DO NOT CHANGE BELOW
@@ -25,6 +27,7 @@ SSH=''
 SSH_SERVICE=''
 APACHE2=''
 APACHE2_SERVICE=''
+APACHE2_CONFIG=''
 PHP=''
 PHP_CONFIG=''
 MYSQL=''
@@ -145,7 +148,13 @@ get_version
 select_option(){
     clear
     case $key in
-        1)	
+        1)
+            # insert a blank line if the file is empty
+            if [ ! -s $SSH_CONFIG_FILE ]; then echo "" > $SSH_CONFIG_FILE; fi	
+            
+
+            # remove the following lines
+            sed -i '/----------------------------/d' $SSH_CONFIG_FILE
             sed -i '/$SCRIPT_NAME/d' $SSH_CONFIG_FILE
 
             sed -i '/PermitRootLogin/d' $SSH_CONFIG_FILE
@@ -158,6 +167,8 @@ select_option(){
             sed -i '/ClientAliveCountMax/d' $SSH_CONFIG_FILE
 
 
+            # edd the following lines to the end of file
+            echo "# ----------------------------" >> $SSH_CONFIG_FILE
             echo "# $SCRIPT_NAME $SCRIPT_VERSION" >> $SSH_CONFIG_FILE
 
             sed -i '$ a PermitRootLogin without-password' $SSH_CONFIG_FILE
@@ -178,6 +189,104 @@ select_option(){
             sudo apt install -y apache2
             sudo a2enmod rewrite
             APACHE2='OK';;
+
+        31)
+            echo -e "install apache2 headers (y/n) ?"
+            read VAR
+
+            if [[ $VAR == 'y' ]]
+            then
+                sudo a2enmod headers
+                sudo service apache2 restart
+            else
+                exit 1
+            fi
+
+            echo -e "install apache2 ModSecurity module (y/n) ?"
+            read VAR
+            if [[ $VAR == 'y' ]]
+            then
+                sudo apt installibapache2-mod-security2 -y
+                sudo service apache2 restart
+            else
+                exit 1
+            fi
+
+
+            echo -e "apply ModSecurity CSR rules from github (y/n) ? "
+            read VAR
+            if [[ $VAR == 'y' ]]
+            then
+                rm -rf /usr/share/modsecurity-crs
+                git clone https://github.com/SpiderLabs/owasp-modsecurity-crs.git /usr/share/modsecurity-crs
+                
+                echo "" > $MODSECURITY_CONFIG_FILE
+                # add the following lines to the end of file
+                sed -i '$ a <IfModule security2_module>' $MODSECURITY_CONFIG_FILE
+                sed -i '$ a         # Default Debian dir for modsecuritys persistent data' $MODSECURITY_CONFIG_FILE
+                sed -i '$ a         SecDataDir /var/cache/modsecurity' $MODSECURITY_CONFIG_FILE
+                
+                sed -i '$ a         # Include all the *.conf files in /etc/modsecurity.' $MODSECURITY_CONFIG_FILE
+                sed -i '$ a         # Keeping your local configuration in that directory' $MODSECURITY_CONFIG_FILE
+                sed -i '$ a         # will allow for an easy upgrade of THIS file and' $MODSECURITY_CONFIG_FILE
+                sed -i '$ a         # make your life easier' $MODSECURITY_CONFIG_FILE
+                sed -i '$ a         IncludeOptional /etc/modsecurity/*.conf' $MODSECURITY_CONFIG_FILE
+                
+                sed -i '$ a         # Include OWASP ModSecurity CRS rules if installed' $MODSECURITY_CONFIG_FILE
+                sed -i '$ a         IncludeOptional /usr/share/modsecurity-crs/*.load' $MODSECURITY_CONFIG_FILE
+                sed -i "$ a         # Extra CRS rules added by $SCRIPT_NAME $SCRIPT_VERSION" $MODSECURITY_CONFIG_FILE
+                sed -i '$ a         IncludeOptional /usr/share/modsecurity-crs/*.conf' $MODSECURITY_CONFIG_FILE
+                sed -i '$ a         IncludeOptional /usr/share/modsecurity-crs/rules/*.conf' $MODSECURITY_CONFIG_FILE
+                sed -i '$ a </IfModule>' $MODSECURITY_CONFIG_FILE
+            else
+                exit 1
+            fi
+
+
+
+            echo -e "apply some security configuration to  apache2.conf (y/n) ?"
+            read VAR
+            if [[ $VAR == 'y' ]]
+            then
+
+                # insert a blank line if the file is empty
+                if [ ! -s $APACHE_CONFIG_FILE ]; then echo "" > $APACHE_CONFIG_FILE; fi	
+                
+
+                # remove the following lines
+                sed -i '/----------------------------/d' $APACHE_CONFIG_FILE
+                sed -i '/$SCRIPT_NAME/d' $APACHE_CONFIG_FILE
+
+                sed -i '/ServerSignature/d' $APACHE_CONFIG_FILE
+                sed -i '/ServerTokens/d' $APACHE_CONFIG_FILE
+                sed -i '/Header set X-XSS-Protection "1; mode=block"/d' $APACHE_CONFIG_FILE
+                sed -i '/Header set X-Content-Type-Options nosniff/d' $APACHE_CONFIG_FILE
+                sed -i '/Header set Referrer-Policy "no-referrer"/d' $APACHE_CONFIG_FILE
+
+
+                # add the following lines to the end of file
+                echo "# ----------------------------" >> $APACHE_CONFIG_FILE
+                echo "# $SCRIPT_NAME $SCRIPT_VERSION" >> $APACHE_CONFIG_FILE
+
+                sed -i '$ a ServerSignature Off' $APACHE_CONFIG_FILE
+                sed -i '$ a ServerTokens Prod' $APACHE_CONFIG_FILE
+                sed -i '$ a Header set X-XSS-Protection "1; mode=block"' $APACHE_CONFIG_FILE
+                sed -i '$ a Header set X-Content-Type-Options nosniff' $APACHE_CONFIG_FILE
+                sed -i '$ a Header set Referrer-Policy "no-referrer"' $APACHE_CONFIG_FILE
+
+                sed -i '$ a <IfModule security2_module>' $APACHE_CONFIG_FILE
+                sed -i '$ a     SecRuleEngine on' $APACHE_CONFIG_FILE
+                sed -i '$ a     ServerTokens Min' $APACHE_CONFIG_FILE
+                sed -i '$ a     SecServerSignature " "' $APACHE_CONFIG_FILE
+                sed -i '$ a </IfModule> ' $APACHE_CONFIG_FILE
+                
+            else
+                exit 1
+            fi
+
+            APACHE2_CONFIG='OK';;
+
+
         4)	
             sudo service apache2 restart
             APACHE2_SERVICE='OK';;
@@ -290,6 +399,7 @@ show_menu(){
     echo -e "${CYAN} 1 Secure configuration for ssh ${LIGHTGREEN} $SSH ${NC}"
     echo -e "${CYAN} 2 Restart ssh service ${LIGHTGREEN} $SSH_SERVICE ${NC}"
     echo -e "${CYAN} 3 Install apache2 ${YELLOW} $APACHE_VERSION  ${LIGHTGREEN} $APACHE2 ${NC}"
+    echo -e "${CYAN} 31 Secure configuration for apache2 ${LIGHTGREEN} $APACHE2_CONFIG ${NC}"
     echo -e "${CYAN} 4 Restart apache2 ${LIGHTGREEN} $APACHE2_SERVICE ${NC}"
     echo -e "${CYAN} 5 Install php ${YELLOW} $PHP_VERSION ${LIGHTGREEN} $PHP ${NC}"
     echo -e "${CYAN} 6 Install mysql ${YELLOW} $MYSQL_VERSION ${LIGHTGREEN} $MYSQL ${NC}"
