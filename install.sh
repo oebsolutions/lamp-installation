@@ -199,7 +199,7 @@ select_option(){
                 sudo a2enmod headers
                 sudo service apache2 restart
             else
-                exit 1
+                echo -e "Skipping this step${NC}"
             fi
 
             echo -e "----------------------------------------------------------------------"
@@ -211,7 +211,7 @@ select_option(){
                 sudo a2enmod security2
                 sudo service apache2 restart
             else
-                exit 1
+                echo -e "Skipping this step${NC}"
             fi
 
             echo -e "----------------------------------------------------------------------"
@@ -241,7 +241,7 @@ select_option(){
                 sed -i '$ a         IncludeOptional /usr/share/modsecurity-crs/rules/*.conf' $MODSECURITY_CONFIG_FILE
                 sed -i '$ a </IfModule>' $MODSECURITY_CONFIG_FILE
             else
-                exit 1
+                echo -e "Skipping this step${NC}"
             fi
 
 
@@ -289,7 +289,7 @@ select_option(){
                 sed -i '$ a </IfModule> ' $APACHE_CONFIG_FILE
                 
             else
-                exit 1
+                echo -e "Skipping this step${NC}"
             fi
 
             APACHE2_CONFIG='OK';;
