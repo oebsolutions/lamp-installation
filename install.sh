@@ -215,7 +215,7 @@ select_option(){
             fi
 
             echo -e "----------------------------------------------------------------------"
-            echo -e "apply ModSecurity CSR rules from github (y/n) ?"
+            echo -e "apply ModSecurity CSR rules from github (y/n) ?${NC}"
             read VAR
             if [[ $VAR == 'y' ]]
             then
